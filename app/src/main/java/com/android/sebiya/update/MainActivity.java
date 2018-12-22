@@ -6,6 +6,7 @@ import com.android.sebiya.update.data.DefaultDataSources;
 import com.android.sebiya.update.data.UrlDataSource.Converter;
 import com.android.sebiya.update.frequency.DefaultFrequencies;
 import com.android.sebiya.update.ui.DefaultDisplays;
+import com.google.gson.Gson;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -16,16 +17,26 @@ public class MainActivity extends AppCompatActivity {
 
         AppUpdateChecker appUpdateChecker = AppUpdateChecker.builder()
                 .withDisplay(DefaultDisplays.simpleToast())
-                .withDataSource(DefaultDataSources.urlDataSource("https://github.com/kshdreams", new Converter() {
-                    @Override
-                    public AppUpdateInfo convert(final String data) {
-                        return AppUpdateInfo.builder().build();
-                    }
-                }))
+                .withDataSource(DefaultDataSources.urlDataSource(
+                        "https://raw.githubusercontent.com/kshdreams/AppUpdateChecker/master/version_sample.json",
+                        new Converter() {
+                            @Override
+                            public AppUpdateInfo convert(final String data) {
+                                AppUpdateInfo appUpdateInfo = new AppUpdateInfo();
+                                VersionSample versionSample = new Gson().fromJson(data, VersionSample.class);
+                                appUpdateInfo.setLatestVersionCode(versionSample.latestVersion);
+                                appUpdateInfo.setMessage("latest version is " + versionSample.latestVersion);
+                                return appUpdateInfo;
+                            }
+                        }))
                 .withFrequency(DefaultFrequencies.everyTime())
                 .withLifeCycle(this)
                 .build();
 
         appUpdateChecker.start(this);
+    }
+
+    public static class VersionSample {
+        public int latestVersion;
     }
 }

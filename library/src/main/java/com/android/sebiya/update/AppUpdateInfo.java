@@ -4,23 +4,22 @@ public final class AppUpdateInfo {
 
     public final boolean hasAvailableUpdates;
 
-    public String lastestVersion;
+    public long latestVersionCode;
+
+    public String latestVersionName;
 
     public String message;
 
-    private AppUpdateInfo(Builder builder) {
+    public AppUpdateInfo() {
         // TODO : check update available
         hasAvailableUpdates = true;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public void setLatestVersionCode(final long latestVersionCode) {
+        this.latestVersionCode = latestVersionCode;
     }
 
-    public static class Builder {
-
-        public AppUpdateInfo build() {
-            return new AppUpdateInfo(this);
-        }
+    public void setMessage(String message) {
+        this.message = message;
     }
 }
