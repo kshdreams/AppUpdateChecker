@@ -2,24 +2,33 @@ package com.android.sebiya.update;
 
 public final class AppUpdateInfo {
 
-    public final boolean hasAvailableUpdates;
+    private long latestVersionCode;
 
-    public long latestVersionCode;
+    private String latestVersionName;
 
-    public String latestVersionName;
+    private long targetVersionCode;
 
-    public String message;
-
-    public AppUpdateInfo() {
-        // TODO : check update available
-        hasAvailableUpdates = true;
+    public AppUpdateInfo(int targetVersionCode) {
+        this.targetVersionCode = targetVersionCode;
     }
 
     public void setLatestVersionCode(final long latestVersionCode) {
         this.latestVersionCode = latestVersionCode;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public long getLatestVersionCode() {
+        return latestVersionCode;
+    }
+
+    public String getLatestVersionName() {
+        return latestVersionName;
+    }
+
+    public void setLatestVersionName(final String latestVersionName) {
+        this.latestVersionName = latestVersionName;
+    }
+
+    public boolean hasAvailableUpdates() {
+        return targetVersionCode < getLatestVersionCode();
     }
 }

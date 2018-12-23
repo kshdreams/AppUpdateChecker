@@ -15,21 +15,23 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        AppUpdateChecker appUpdateChecker = AppUpdateChecker.builder()
-                .withDisplay(DefaultDisplays.simpleToast())
+        AppUpdateChecker appUpdateChecker = AppUpdateChecker
+                .builder()
+                .showUiWhenNoUpdates(true)
+                .withDisplay(DefaultDisplays.SNACK_BAR)
                 .withDataSource(DefaultDataSources.urlDataSource(
                         "https://raw.githubusercontent.com/kshdreams/AppUpdateChecker/master/version_sample.json",
                         new Converter() {
                             @Override
                             public AppUpdateInfo convert(final String data) {
-                                AppUpdateInfo appUpdateInfo = new AppUpdateInfo();
+                                AppUpdateInfo appUpdateInfo = new AppUpdateInfo(2);
                                 VersionSample versionSample = new Gson().fromJson(data, VersionSample.class);
                                 appUpdateInfo.setLatestVersionCode(versionSample.latestVersion);
-                                appUpdateInfo.setMessage("latest version is " + versionSample.latestVersion);
+                                appUpdateInfo.setLatestVersionName(versionSample.latestVersionName);
                                 return appUpdateInfo;
                             }
                         }))
-                .withFrequency(DefaultFrequencies.everyTime())
+                .withFrequency(DefaultFrequencies.EVERY_TIME)
                 .withLifeCycle(this)
                 .build();
 
@@ -38,5 +40,6 @@ public class MainActivity extends AppCompatActivity {
 
     public static class VersionSample {
         public int latestVersion;
+        public String latestVersionName;
     }
 }

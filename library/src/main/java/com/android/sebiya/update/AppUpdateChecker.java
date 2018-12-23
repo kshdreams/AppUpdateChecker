@@ -11,7 +11,7 @@ import com.android.sebiya.update.data.DataSource;
 import com.android.sebiya.update.frequency.EveryTime;
 import com.android.sebiya.update.frequency.Frequency;
 import com.android.sebiya.update.ui.Display;
-import com.android.sebiya.update.ui.SimpleToastDisplay;
+import com.android.sebiya.update.ui.SimpleSnackbarDisplay;
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
@@ -35,6 +35,8 @@ public final class AppUpdateChecker implements LifecycleObserver {
 
     private final AppUpdateLifecycleCallback mCallback;
 
+    private final boolean mForceShow;
+
     private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
 
     private AppUpdateChecker(Builder builder) {
@@ -46,6 +48,7 @@ public final class AppUpdateChecker implements LifecycleObserver {
             mLifecycleOwner.getLifecycle().addObserver(this);
         }
         mCallback = builder.mCallback;
+        mForceShow = builder.mForceShow;
     }
 
     public static Builder builder() {
@@ -58,52 +61,65 @@ public final class AppUpdateChecker implements LifecycleObserver {
                 mCallback.onStart();
             }
 
-            mCompositeDisposable.add(Single.create(new SingleOnSubscribe<AppUpdateInfo>() {
-                @Override
-                public void subscribe(final SingleEmitter<AppUpdateInfo> emitter) {
-                    emitter.onSuccess(mDataSource.load());
-                }
-            }).subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .map(new Function<AppUpdateInfo, AppUpdateInfo>() {
-                        @Override
-                        public AppUpdateInfo apply(final AppUpdateInfo appUpdateInfo) {
-                            if (BuildConfig.DEBUG) {
-                                Log.d(LOG_TAG, "start. data - " + appUpdateInfo);
-                            }
-                            if (mCallback != null) {
-                                mCallback.onDataLoaded(appUpdateInfo);
-                            }
-                            if (appUpdateInfo.hasAvailableUpdates) {
-                                mDisplay.show(activity, appUpdateInfo);
-                            }
-                            if (mCallback != null) {
-                                mCallback.onDisplayShowing(appUpdateInfo);
-                            }
-                            return appUpdateInfo;
-                        }
-                    }).subscribe(new Consumer<AppUpdateInfo>() {
-                        @Override
-                        public void accept(final AppUpdateInfo appUpdateChecker) {
-                            if (BuildConfig.DEBUG) {
-                                Log.d(LOG_TAG, "start. info - " + appUpdateChecker);
-                            }
-                        }
-                    }, new Consumer<Throwable>() {
-                        @Override
-                        public void accept(final Throwable throwable) {
-                            Log.e(LOG_TAG, "start", throwable);
-                        }
-                    }));
+            mCompositeDisposable.add(
+                    loadAppUpdateInfo()
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .map(showUi(activity))
+                            .subscribe(new Consumer<Boolean>() {
+                                @Override
+                                public void accept(final Boolean dialogShow) {
+                                    if (BuildConfig.DEBUG) {
+                                        Log.d(LOG_TAG, "start. dialogShow - " + dialogShow);
+                                    }
+                                }
+                            }, new Consumer<Throwable>() {
+                                @Override
+                                public void accept(final Throwable throwable) {
+                                    Log.e(LOG_TAG, "start", throwable);
+                                }
+                            }));
         }
     }
 
     @OnLifecycleEvent(Event.ON_DESTROY)
     public void stop() {
+        Log.d(LOG_TAG, "stop called");
         if (mLifecycleOwner != null) {
             mLifecycleOwner.getLifecycle().removeObserver(this);
         }
         mCompositeDisposable.clear();
+    }
+
+    private Single<AppUpdateInfo> loadAppUpdateInfo() {
+        return Single.create(new SingleOnSubscribe<AppUpdateInfo>() {
+            @Override
+            public void subscribe(final SingleEmitter<AppUpdateInfo> emitter) {
+                emitter.onSuccess(mDataSource.load());
+            }
+        });
+    }
+
+    private Function<AppUpdateInfo, Boolean> showUi(final Activity activity) {
+        return new Function<AppUpdateInfo, Boolean>() {
+            @Override
+            public Boolean apply(final AppUpdateInfo appUpdateInfo) {
+                if (BuildConfig.DEBUG) {
+                    Log.d(LOG_TAG, "showUi. data - " + appUpdateInfo);
+                }
+                if (mCallback != null) {
+                    mCallback.onDataLoaded(appUpdateInfo);
+                }
+                if (appUpdateInfo.hasAvailableUpdates() || mForceShow) {
+                    mDisplay.show(activity, appUpdateInfo);
+                    if (mCallback != null) {
+                        mCallback.onDisplayShowing(appUpdateInfo);
+                    }
+                    return true;
+                }
+                return false;
+            }
+        };
     }
 
     public static class Builder {
@@ -113,6 +129,8 @@ public final class AppUpdateChecker implements LifecycleObserver {
         private DataSource mDataSource;
 
         private Display mDisplay;
+
+        private boolean mForceShow;
 
         private LifecycleOwner mLifecycleOwner;
 
@@ -143,8 +161,13 @@ public final class AppUpdateChecker implements LifecycleObserver {
             return this;
         }
 
+        public Builder showUiWhenNoUpdates(boolean forceShow) {
+            mForceShow = forceShow;
+            return this;
+        }
+
+
         public AppUpdateChecker build() {
-            // TODO : make default data
             if (mDataSource == null) {
                 throw new RuntimeException("data source is required");
             }
@@ -158,7 +181,7 @@ public final class AppUpdateChecker implements LifecycleObserver {
             }
 
             if (mDisplay == null) {
-                mDisplay = new SimpleToastDisplay();
+                mDisplay = new SimpleSnackbarDisplay();
             }
         }
     }

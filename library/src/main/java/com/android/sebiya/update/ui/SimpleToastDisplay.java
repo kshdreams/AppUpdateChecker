@@ -8,6 +8,8 @@ public class SimpleToastDisplay implements Display {
 
     @Override
     public void show(final Activity activity, final AppUpdateInfo appUpdateInfo) {
-        Toast.makeText(activity, appUpdateInfo.message, Toast.LENGTH_SHORT).show();
+        String message = appUpdateInfo.hasAvailableUpdates() ? "Update " + appUpdateInfo.getLatestVersionName()
+                + " is available!" : "No updates available";
+        Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
     }
 }
