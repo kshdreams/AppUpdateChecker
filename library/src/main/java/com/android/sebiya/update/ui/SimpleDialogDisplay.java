@@ -19,27 +19,47 @@ public class SimpleDialogDisplay implements Display {
         onCreateDialog(activity, appUpdateInfo).show();
     }
 
-    protected AlertDialog.Builder onCreateDialog(final Activity activity, AppUpdateInfo appUpdateInfo) {
+    protected String getTitle(AppUpdateInfo appUpdateInfo) {
+        return appUpdateInfo.hasAvailableUpdates() ? "New update available!" : "No update";
+    }
 
-        String message = appUpdateInfo.hasAvailableUpdates() ? "Update " + appUpdateInfo.getLatestVersionName()
+    protected String getMessage(AppUpdateInfo appUpdateInfo) {
+        return appUpdateInfo.hasAvailableUpdates() ? "Update " + appUpdateInfo.getLatestVersionName()
                 + " is available!" : "No updates available";
-        String title = appUpdateInfo.hasAvailableUpdates() ? "New update available!" : "No update";
+    }
 
-        return new Builder(activity)
-                .setTitle(title)
-                .setMessage(message)
-                .setCancelable(false)
-                .setPositiveButton("업데이트", new OnClickListener() {
-                    @Override
-                    public void onClick(final DialogInterface dialog, final int which) {
-                        AppUpdaterUtils.launchGooglePlay(activity, activity.getPackageName());
-                    }
-                })
-                .setNegativeButton("취소", new OnClickListener() {
-                    @Override
-                    public void onClick(final DialogInterface dialog, final int which) {
+    protected void performUpdate(Activity activity) {
+        AppUpdaterUtils.launchGooglePlay(activity, activity.getPackageName());
+    }
 
-                    }
-                });
+    protected AlertDialog.Builder onCreateDialog(final Activity activity, AppUpdateInfo appUpdateInfo) {
+        Builder builder = new Builder(activity)
+                .setTitle(getTitle(appUpdateInfo))
+                .setMessage(getMessage(appUpdateInfo))
+                .setCancelable(false);
+        if (appUpdateInfo.hasAvailableUpdates()) {
+            builder
+                    .setPositiveButton("Update", new OnClickListener() {
+                        @Override
+                        public void onClick(final DialogInterface dialog, final int which) {
+                            performUpdate(activity);
+}
+                    })
+                    .setNegativeButton("Cancel", new OnClickListener() {
+                        @Override
+                        public void onClick(final DialogInterface dialog, final int which) {
+
+                        }
+                    });
+        } else {
+            builder.setPositiveButton("Ok", new OnClickListener() {
+                @Override
+                public void onClick(final DialogInterface dialog, final int which) {
+
+                }
+            });
+        }
+
+        return builder;
     }
 }

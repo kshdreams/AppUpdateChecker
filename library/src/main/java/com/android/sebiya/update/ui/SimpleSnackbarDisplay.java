@@ -14,17 +14,34 @@ public class SimpleSnackbarDisplay implements Display {
 
     @Override
     public void show(final Activity activity, final AppUpdateInfo appUpdateInfo) {
-        String message = appUpdateInfo.hasAvailableUpdates() ? "Update " + appUpdateInfo.getLatestVersionName()
-                + " is available!" : "No updates available";
-        Snackbar.make(activity.getWindow().getDecorView(),
-                message,
-                Snackbar.LENGTH_INDEFINITE)
-                .setAction("Update", new OnClickListener() {
-                    @Override
-                    public void onClick(final View v) {
-                        AppUpdaterUtils.launchGooglePlay(activity, activity.getPackageName());
-                    }
-                })
-                .show();
+        Snackbar snackbar = Snackbar.make(activity.getWindow().getDecorView(),
+                getMessage(appUpdateInfo),
+                Snackbar.LENGTH_INDEFINITE);
+        if (appUpdateInfo.hasAvailableUpdates()) {
+            snackbar.setAction("Update", new OnClickListener() {
+                @Override
+                public void onClick(final View v) {
+                    performUpdate(activity);
+                }
+            });
+        } else {
+            snackbar.setAction("Ok", new OnClickListener() {
+                @Override
+                public void onClick(final View v) {
+
+                }
+            });
+        }
+        snackbar.show();
     }
+
+    protected String getMessage(AppUpdateInfo appUpdateInfo) {
+        return appUpdateInfo.hasAvailableUpdates() ? "Update " + appUpdateInfo.getLatestVersionName()
+                + " is available!" : "No updates available";
+    }
+
+    protected void performUpdate(Activity activity) {
+        AppUpdaterUtils.launchGooglePlay(activity, activity.getPackageName());
+    }
+
 }
