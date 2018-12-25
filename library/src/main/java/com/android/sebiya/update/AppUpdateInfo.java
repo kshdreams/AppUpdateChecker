@@ -1,5 +1,7 @@
 package com.android.sebiya.update;
 
+import android.text.TextUtils;
+
 public final class AppUpdateInfo {
 
     private long latestVersionCode;
@@ -7,9 +9,11 @@ public final class AppUpdateInfo {
     private String latestVersionName;
 
     private long targetVersionCode;
+    private String targetVersionName;
 
-    public AppUpdateInfo(int targetVersionCode) {
+    public AppUpdateInfo(int targetVersionCode, String targetVersionName) {
         this.targetVersionCode = targetVersionCode;
+        this.targetVersionName = targetVersionName;
     }
 
     public void setLatestVersionCode(final long latestVersionCode) {
@@ -29,6 +33,11 @@ public final class AppUpdateInfo {
     }
 
     public boolean hasAvailableUpdates() {
-        return targetVersionCode < getLatestVersionCode();
+        if (getLatestVersionCode() > 0) {
+            return targetVersionCode < getLatestVersionCode();
+        }
+
+        // TODO : real version check
+        return !TextUtils.equals(targetVersionName, getLatestVersionName());
     }
 }

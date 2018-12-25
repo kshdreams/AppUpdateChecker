@@ -1,13 +1,18 @@
 package com.android.sebiya.update;
 
+import android.app.Activity;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Toast;
 import com.android.sebiya.update.data.DefaultDataSources;
 import com.android.sebiya.update.data.UrlDataSource.Converter;
 import com.android.sebiya.update.frequency.DefaultFrequencies;
 import com.android.sebiya.update.ui.DefaultDisplays;
+import com.android.sebiya.update.ui.Display;
 import com.android.sebiya.update.ui.SimpleDialogDisplay;
 import com.google.gson.Gson;
 
@@ -15,6 +20,9 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int SERVER_VERSION_CODE = 2;
     private static final int CURRENT_VERSION_CODE = 1;
+
+    private static final String SERVER_VERSION_NAME = "2.0";
+    private static final String CURRENT_VERSION_NAME = "1.0";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
                         .withDisplay(DefaultDisplays.DIALOG)
                         .withDataSource(DefaultDataSources.urlDataSource(
                                 "https://raw.githubusercontent.com/kshdreams/AppUpdateChecker/master/version_sample.json",
-                                new GithubStringToAppUpdateInfoConverter(CURRENT_VERSION_CODE)))
+                                new GithubStringToAppUpdateInfoConverter(CURRENT_VERSION_CODE, CURRENT_VERSION_NAME)))
                         .withFrequency(DefaultFrequencies.EVERY_TIME)
                         .withLifeCycle(MainActivity.this)
                         .build();
@@ -46,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
                         .withDisplay(DefaultDisplays.SNACK_BAR)
                         .withDataSource(DefaultDataSources.urlDataSource(
                                 "https://raw.githubusercontent.com/kshdreams/AppUpdateChecker/master/version_sample.json",
-                                new GithubStringToAppUpdateInfoConverter(CURRENT_VERSION_CODE)))
+                                new GithubStringToAppUpdateInfoConverter(CURRENT_VERSION_CODE, CURRENT_VERSION_NAME)))
                         .withFrequency(DefaultFrequencies.EVERY_TIME)
                         .withLifeCycle(MainActivity.this)
                         .build();
@@ -63,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
                         .withDisplay(DefaultDisplays.TOAST)
                         .withDataSource(DefaultDataSources.urlDataSource(
                                 "https://raw.githubusercontent.com/kshdreams/AppUpdateChecker/master/version_sample.json",
-                                new GithubStringToAppUpdateInfoConverter(CURRENT_VERSION_CODE)))
+                                new GithubStringToAppUpdateInfoConverter(CURRENT_VERSION_CODE, CURRENT_VERSION_NAME)))
                         .withFrequency(DefaultFrequencies.EVERY_TIME)
                         .withLifeCycle(MainActivity.this)
                         .build();
@@ -76,7 +84,36 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.custom_dialog_update).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
+                final String tiktokPackage = "com.ss.android.ugc.trill";
+                AppUpdateChecker appUpdateChecker = AppUpdateChecker
+                        .builder()
+                        .withDisplay(new Display() {
+                            @Override
+                            public void show(final Activity activity, final AppUpdateInfo appUpdateInfo) {
+                                String message = "TikTok app has " + (appUpdateInfo.hasAvailableUpdates() ? "update" : "no update");
+                                if (appUpdateInfo.hasAvailableUpdates()) {
+                                    message += "\nlatest version - " + appUpdateInfo.getLatestVersionName();
+                                }
+                                // make custom display such as notification, dialog, snackbar, toast, etc...
+                                new AlertDialog.Builder(activity)
+                                        .setTitle("Custom Display")
+                                        .setMessage(message)
+                                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(final DialogInterface dialog, final int which) {
+                                                if (appUpdateInfo.hasAvailableUpdates()) {
+                                                    AppUpdaterUtils.launchGooglePlay(MainActivity.this, tiktokPackage);
+                                                }
+                                            }
+                                        }).show();
+                            }
+                        })
+                        .withDataSource(DefaultDataSources.googlePlayDataSource(tiktokPackage, "4.4.3"))
+                        .withFrequency(DefaultFrequencies.EVERY_TIME)
+                        .withLifeCycle(MainActivity.this)
+                        .build();
 
+                appUpdateChecker.start(MainActivity.this);
             }
         });
 
@@ -97,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
                         })
                         .withDataSource(DefaultDataSources.urlDataSource(
                                 "https://raw.githubusercontent.com/kshdreams/AppUpdateChecker/master/version_sample.json",
-                                new GithubStringToAppUpdateInfoConverter(SERVER_VERSION_CODE)))
+                                new GithubStringToAppUpdateInfoConverter(SERVER_VERSION_CODE, SERVER_VERSION_NAME)))
                         .withFrequency(DefaultFrequencies.EVERY_TIME)
                         .withLifeCycle(MainActivity.this)
                         .build();
@@ -114,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
                         .withDisplay(DefaultDisplays.SNACK_BAR)
                         .withDataSource(DefaultDataSources.urlDataSource(
                                 "https://raw.githubusercontent.com/kshdreams/AppUpdateChecker/master/version_sample.json",
-                                new GithubStringToAppUpdateInfoConverter(SERVER_VERSION_CODE)))
+                                new GithubStringToAppUpdateInfoConverter(SERVER_VERSION_CODE, SERVER_VERSION_NAME)))
                         .withFrequency(DefaultFrequencies.EVERY_TIME)
                         .withLifeCycle(MainActivity.this)
                         .build();
@@ -131,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
                         .withDisplay(DefaultDisplays.TOAST)
                         .withDataSource(DefaultDataSources.urlDataSource(
                                 "https://raw.githubusercontent.com/kshdreams/AppUpdateChecker/master/version_sample.json",
-                                new GithubStringToAppUpdateInfoConverter(SERVER_VERSION_CODE)))
+                                new GithubStringToAppUpdateInfoConverter(SERVER_VERSION_CODE, SERVER_VERSION_NAME)))
                         .withFrequency(DefaultFrequencies.EVERY_TIME)
                         .withLifeCycle(MainActivity.this)
                         .build();
@@ -142,7 +179,24 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.custom_dialog_no_update).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(final View v) {
+                final String tiktokPackage = "com.ss.android.ugc.trill";
+                AppUpdateChecker appUpdateChecker = AppUpdateChecker
+                        .builder()
+                        .showUiWhenNoUpdates(true)
+                        .withDisplay(new Display() {
+                            @Override
+                            public void show(final Activity activity, final AppUpdateInfo appUpdateInfo) {
+                                // make custom display such as notification, dialog, snackbar, toast, etc...
+                                Toast.makeText(activity, "Tiktok has update ? " + appUpdateInfo.hasAvailableUpdates(),
+                                        Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .withDataSource(DefaultDataSources.googlePlayDataSource(tiktokPackage, "4.4.4"))
+                        .withFrequency(DefaultFrequencies.EVERY_TIME)
+                        .withLifeCycle(MainActivity.this)
+                        .build();
 
+                appUpdateChecker.start(MainActivity.this);
             }
         });
 
@@ -156,14 +210,16 @@ public class MainActivity extends AppCompatActivity {
     private static class GithubStringToAppUpdateInfoConverter implements Converter {
 
         private final int targetVersionCode;
+        private final String targetVersionName;
 
-        GithubStringToAppUpdateInfoConverter(int targetVersionCode) {
+        GithubStringToAppUpdateInfoConverter(int targetVersionCode, String targetVersionName) {
             this.targetVersionCode = targetVersionCode;
+            this.targetVersionName = targetVersionName;
         }
 
         @Override
         public AppUpdateInfo convert(final String data) {
-            AppUpdateInfo appUpdateInfo = new AppUpdateInfo(targetVersionCode);
+            AppUpdateInfo appUpdateInfo = new AppUpdateInfo(targetVersionCode, targetVersionName);
             VersionSample versionSample = new Gson().fromJson(data, VersionSample.class);
             appUpdateInfo.setLatestVersionCode(versionSample.latestVersion);
             appUpdateInfo.setLatestVersionName(versionSample.latestVersionName);
