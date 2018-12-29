@@ -55,11 +55,8 @@ AppUpdateChecker.builder()
 
 ##### DataSource
 provide 2 types of data source by default. 
-- GooglePlay
-we retrieve versionName from google play detail pages of given packages.
-- Url
-we download xml or json file from given url. you must implements Conveter to make version info from plain string.
-
+- GooglePlay : we retrieve versionName from google play detail pages of given packages.
+- Url : we download xml or json file from given url. you must implements Conveter to make version info from plain string.
 or you can implements DataSource interface to get latest version. (ex> Firebase RemoteConfig)
 ```java
 AppUpdateChecker.builder()
