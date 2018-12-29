@@ -8,7 +8,7 @@ public interface AppVersionChecker {
 
     AppVersionChecker DEFAULT = new DefaultImpl();
 
-     class DefaultImpl implements AppVersionChecker {
+    class DefaultImpl implements AppVersionChecker {
 
         @Override
         public boolean hasAvailableUpdates(final AppUpdateInfo appUpdateInfo) {

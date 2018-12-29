@@ -10,7 +10,7 @@ import com.android.sebiya.update.data.DataSource;
 import com.android.sebiya.update.frequency.EveryTime;
 import com.android.sebiya.update.frequency.Frequency;
 import com.android.sebiya.update.ui.Display;
-import com.android.sebiya.update.ui.SimpleSnackbarDisplay;
+import com.android.sebiya.update.ui.SimpleDialogDisplay;
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
 import io.reactivex.SingleOnSubscribe;
@@ -214,7 +214,7 @@ public final class AppUpdateChecker implements LifecycleObserver{
             }
 
             if (mDisplay == null) {
-                mDisplay = new SimpleSnackbarDisplay();
+                mDisplay = new SimpleDialogDisplay();
             }
 
             if (mVersionChecker == null) {
