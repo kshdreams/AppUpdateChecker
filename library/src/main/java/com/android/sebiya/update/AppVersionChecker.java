@@ -1,6 +1,6 @@
 package com.android.sebiya.update;
 
-import android.text.TextUtils;
+import com.g00fy2.versioncompare.Version;
 
 public interface AppVersionChecker {
 
@@ -8,7 +8,7 @@ public interface AppVersionChecker {
 
     AppVersionChecker DEFAULT = new DefaultImpl();
 
-    class DefaultImpl implements AppVersionChecker {
+     class DefaultImpl implements AppVersionChecker {
 
         @Override
         public boolean hasAvailableUpdates(final AppUpdateInfo appUpdateInfo) {
@@ -16,8 +16,12 @@ public interface AppVersionChecker {
                 return appUpdateInfo.getTargetVersionCode() < appUpdateInfo.getLatestVersionCode();
             }
 
-            // TODO : real version check
-            return !TextUtils.equals(appUpdateInfo.getTargetVersionName(), appUpdateInfo.getLatestVersionName());
+            if (appUpdateInfo.getTargetVersionName() == null || appUpdateInfo.getLatestVersionName() == null) {
+                return false;
+            }
+
+            Version version = new Version(appUpdateInfo.getLatestVersionName());
+            return version.isHigherThan(appUpdateInfo.getTargetVersionName());
         }
     }
 }
