@@ -9,12 +9,25 @@ import com.android.sebiya.update.AppUpdaterUtils;
 
 public class SimpleSnackbarDisplay implements Display {
 
+    private View mTargetView;
+
     public SimpleSnackbarDisplay() {
+    }
+
+    public SimpleSnackbarDisplay(View target) {
+        mTargetView = target;
     }
 
     @Override
     public void show(final Activity activity, final AppUpdateInfo appUpdateInfo) {
-        Snackbar snackbar = Snackbar.make(activity.getWindow().getDecorView(),
+        View target = mTargetView;
+        if (target == null) {
+            target = activity.getWindow().getDecorView().findViewById(android.R.id.content);
+        }
+        if (target == null) {
+            target = activity.getWindow().getDecorView();
+        }
+        Snackbar snackbar = Snackbar.make(target,
                 getMessage(appUpdateInfo),
                 Snackbar.LENGTH_INDEFINITE);
         if (appUpdateInfo.hasAvailableUpdates()) {

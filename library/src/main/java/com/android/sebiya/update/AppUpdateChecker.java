@@ -6,7 +6,6 @@ import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.OnLifecycleEvent;
 import android.util.Log;
-import com.android.sebiya.library.BuildConfig;
 import com.android.sebiya.update.data.DataSource;
 import com.android.sebiya.update.frequency.EveryTime;
 import com.android.sebiya.update.frequency.Frequency;
@@ -21,7 +20,7 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
-public final class AppUpdateChecker implements LifecycleObserver {
+public final class AppUpdateChecker implements LifecycleObserver{
 
     private static final String LOG_TAG = "AppUpdateChecker";
 
@@ -35,9 +34,13 @@ public final class AppUpdateChecker implements LifecycleObserver {
 
     private final AppUpdateLifecycleCallback mCallback;
 
+    private final AppVersionChecker mVersionChecker;
+
     private final boolean mForceShow;
 
     private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
+
+    private final boolean mEnableLog;
 
     private AppUpdateChecker(Builder builder) {
         mFrequency = builder.mFrequency;
@@ -49,6 +52,8 @@ public final class AppUpdateChecker implements LifecycleObserver {
         }
         mCallback = builder.mCallback;
         mForceShow = builder.mForceShow;
+        mVersionChecker = builder.mVersionChecker;
+        mEnableLog = builder.mEnableLog;
     }
 
     public static Builder builder() {
@@ -65,11 +70,12 @@ public final class AppUpdateChecker implements LifecycleObserver {
                     loadAppUpdateInfo()
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
+                            .map(updateVersionInfo())
                             .map(showUi(activity))
                             .subscribe(new Consumer<Boolean>() {
                                 @Override
                                 public void accept(final Boolean dialogShow) {
-                                    if (BuildConfig.DEBUG) {
+                                    if (mEnableLog) {
                                         Log.d(LOG_TAG, "start. dialogShow - " + dialogShow);
                                     }
                                 }
@@ -100,17 +106,30 @@ public final class AppUpdateChecker implements LifecycleObserver {
         });
     }
 
+    private Function<AppUpdateInfo, AppUpdateInfo> updateVersionInfo() {
+        return new Function<AppUpdateInfo, AppUpdateInfo>() {
+            @Override
+            public AppUpdateInfo apply(final AppUpdateInfo appUpdateInfo) {
+                appUpdateInfo.setHasAvailableUpdates(mVersionChecker.hasAvailableUpdates(appUpdateInfo));
+                if (mEnableLog) {
+                    Log.d(LOG_TAG, "updateVersionInfo. data - " + appUpdateInfo);
+                }
+                return appUpdateInfo;
+            }
+        };
+    }
+
     private Function<AppUpdateInfo, Boolean> showUi(final Activity activity) {
         return new Function<AppUpdateInfo, Boolean>() {
             @Override
             public Boolean apply(final AppUpdateInfo appUpdateInfo) {
-                if (BuildConfig.DEBUG) {
+                if (mEnableLog) {
                     Log.d(LOG_TAG, "showUi. data - " + appUpdateInfo);
                 }
                 if (mCallback != null) {
                     mCallback.onDataLoaded(appUpdateInfo);
                 }
-                if (appUpdateInfo.hasAvailableUpdates() || mForceShow) {
+                if (mVersionChecker.hasAvailableUpdates(appUpdateInfo) || mForceShow) {
                     mDisplay.show(activity, appUpdateInfo);
                     if (mCallback != null) {
                         mCallback.onDisplayShowing(appUpdateInfo);
@@ -132,7 +151,11 @@ public final class AppUpdateChecker implements LifecycleObserver {
 
         private boolean mForceShow;
 
+        private boolean mEnableLog;
+
         private LifecycleOwner mLifecycleOwner;
+
+        private AppVersionChecker mVersionChecker;
 
         private AppUpdateLifecycleCallback mCallback;
 
@@ -161,8 +184,18 @@ public final class AppUpdateChecker implements LifecycleObserver {
             return this;
         }
 
+        public Builder withVersionChecker(AppVersionChecker versionChecker) {
+            mVersionChecker = versionChecker;
+            return this;
+        }
+
         public Builder showUiWhenNoUpdates(boolean forceShow) {
             mForceShow = forceShow;
+            return this;
+        }
+
+        public Builder enableLog(boolean enable) {
+            mEnableLog = enable;
             return this;
         }
 
@@ -182,6 +215,10 @@ public final class AppUpdateChecker implements LifecycleObserver {
 
             if (mDisplay == null) {
                 mDisplay = new SimpleSnackbarDisplay();
+            }
+
+            if (mVersionChecker == null) {
+                mVersionChecker = AppVersionChecker.DEFAULT;
             }
         }
     }

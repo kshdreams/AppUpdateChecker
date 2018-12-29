@@ -13,6 +13,7 @@ import org.jsoup.Jsoup;
  * in that case you can't use this data source.
  *
  * this class use Jsoup which have MIT license.
+ * // TODO : link github page and write MIT license at the top of code
  */
 public class GooglePlayDataSource implements DataSource {
     private static final String LOG_TAG = "GooglePlayDataSource";
