@@ -16,7 +16,7 @@ repositories {
 
 // Module level build.gradle
 dependencies {
-implementation 'com.github.kshdreams:AppUpdateChecker:0.0.1'
+implementation 'com.github.kshdreams:AppUpdateChecker:0.0.3'
 }
 ```
 
@@ -86,6 +86,20 @@ AppUpdateChecker.builder()
             return false;
         }
     })    
+```
+
+### Installer
+we provide interface to customize install interface by callsing .withInstaller()
+```java
+AppUpdateChecker.builder()
+    .withInstaller(new GooglePlayInstaller())
+    .withInstaller(new PackageInstaller() {
+        @Override
+        public void install(final Context context) {
+            // download apk
+            // and startActivity with install intent
+        }
+    })
 ```
 
 ### Lifecycle
