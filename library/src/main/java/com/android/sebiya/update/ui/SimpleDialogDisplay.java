@@ -6,7 +6,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AlertDialog.Builder;
 import com.android.sebiya.update.AppUpdateInfo;
-import com.android.sebiya.update.AppUpdaterUtils;
+import com.android.sebiya.update.install.PackageInstaller;
 
 public class SimpleDialogDisplay implements Display {
 
@@ -15,8 +15,8 @@ public class SimpleDialogDisplay implements Display {
     }
 
     @Override
-    public void show(final Activity activity, final AppUpdateInfo appUpdateInfo) {
-        onCreateDialog(activity, appUpdateInfo).show();
+    public void show(final Activity activity, final AppUpdateInfo appUpdateInfo, PackageInstaller installer) {
+        onCreateDialog(activity, appUpdateInfo, installer).show();
     }
 
     protected String getTitle(AppUpdateInfo appUpdateInfo) {
@@ -28,11 +28,11 @@ public class SimpleDialogDisplay implements Display {
                 + " is available!" : "No updates available";
     }
 
-    protected void performUpdate(Activity activity) {
-        AppUpdaterUtils.launchGooglePlay(activity, activity.getPackageName());
+    protected void performUpdate(Activity activity, PackageInstaller installer) {
+        installer.install(activity);
     }
 
-    protected AlertDialog.Builder onCreateDialog(final Activity activity, AppUpdateInfo appUpdateInfo) {
+    protected AlertDialog.Builder onCreateDialog(final Activity activity, AppUpdateInfo appUpdateInfo, final PackageInstaller installer) {
         Builder builder = new Builder(activity)
                 .setTitle(getTitle(appUpdateInfo))
                 .setMessage(getMessage(appUpdateInfo))
@@ -42,7 +42,7 @@ public class SimpleDialogDisplay implements Display {
                     .setPositiveButton("Update", new OnClickListener() {
                         @Override
                         public void onClick(final DialogInterface dialog, final int which) {
-                            performUpdate(activity);
+                            performUpdate(activity, installer);
 }
                     })
                     .setNegativeButton("Cancel", new OnClickListener() {

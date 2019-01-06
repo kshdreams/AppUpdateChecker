@@ -5,7 +5,7 @@ import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.view.View.OnClickListener;
 import com.android.sebiya.update.AppUpdateInfo;
-import com.android.sebiya.update.AppUpdaterUtils;
+import com.android.sebiya.update.install.PackageInstaller;
 
 public class SimpleSnackbarDisplay implements Display {
 
@@ -19,7 +19,7 @@ public class SimpleSnackbarDisplay implements Display {
     }
 
     @Override
-    public void show(final Activity activity, final AppUpdateInfo appUpdateInfo) {
+    public void show(final Activity activity, final AppUpdateInfo appUpdateInfo, final PackageInstaller installer) {
         View target = mTargetView;
         if (target == null) {
             target = activity.getWindow().getDecorView().findViewById(android.R.id.content);
@@ -34,7 +34,7 @@ public class SimpleSnackbarDisplay implements Display {
             snackbar.setAction("Update", new OnClickListener() {
                 @Override
                 public void onClick(final View v) {
-                    performUpdate(activity);
+                    performUpdate(activity, installer);
                 }
             });
         } else {
@@ -53,8 +53,8 @@ public class SimpleSnackbarDisplay implements Display {
                 + " is available!" : "No updates available";
     }
 
-    protected void performUpdate(Activity activity) {
-        AppUpdaterUtils.launchGooglePlay(activity, activity.getPackageName());
+    protected void performUpdate(Activity activity, PackageInstaller installer) {
+        installer.install(activity);
     }
 
 }

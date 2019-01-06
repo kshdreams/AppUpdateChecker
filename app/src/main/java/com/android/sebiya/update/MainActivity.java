@@ -10,6 +10,7 @@ import android.view.View.OnClickListener;
 import com.android.sebiya.update.data.DefaultDataSources;
 import com.android.sebiya.update.data.UrlDataSource.Converter;
 import com.android.sebiya.update.frequency.DefaultFrequencies;
+import com.android.sebiya.update.install.PackageInstaller;
 import com.android.sebiya.update.ui.DefaultDisplays;
 import com.android.sebiya.update.ui.Display;
 import com.android.sebiya.update.ui.SimpleDialogDisplay;
@@ -53,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
                         .showUiWhenNoUpdates(true)
                         .withDisplay(new Display() {
                             @Override
-                            public void show(final Activity activity, final AppUpdateInfo appUpdateInfo) {
+                            public void show(final Activity activity, final AppUpdateInfo appUpdateInfo, PackageInstaller installer) {
                                 // make custom display such as notification, dialog, snackbar, toast, etc...
                                 String message = "TikTok app has " + (appUpdateInfo.hasAvailableUpdates() ? "update" : "no update");
                                 if (appUpdateInfo.hasAvailableUpdates()) {
@@ -157,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
                         .builder()
                         .withDisplay(new Display() {
                             @Override
-                            public void show(final Activity activity, final AppUpdateInfo appUpdateInfo) {
+                            public void show(final Activity activity, final AppUpdateInfo appUpdateInfo, PackageInstaller installer) {
                                 String message = "TikTok app has " + (appUpdateInfo.hasAvailableUpdates() ? "update" : "no update");
                                 if (appUpdateInfo.hasAvailableUpdates()) {
                                     message += "\nlatest version - " + appUpdateInfo.getLatestVersionName();

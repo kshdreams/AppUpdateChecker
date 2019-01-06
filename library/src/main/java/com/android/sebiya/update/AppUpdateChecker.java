@@ -9,6 +9,8 @@ import android.util.Log;
 import com.android.sebiya.update.data.DataSource;
 import com.android.sebiya.update.frequency.EveryTime;
 import com.android.sebiya.update.frequency.Frequency;
+import com.android.sebiya.update.install.GooglePlayInstaller;
+import com.android.sebiya.update.install.PackageInstaller;
 import com.android.sebiya.update.ui.Display;
 import com.android.sebiya.update.ui.SimpleDialogDisplay;
 import io.reactivex.Single;
@@ -36,6 +38,8 @@ public final class AppUpdateChecker implements LifecycleObserver{
 
     private final AppVersionChecker mVersionChecker;
 
+    private final PackageInstaller mPackageInstaller;
+
     private final boolean mForceShow;
 
     private CompositeDisposable mCompositeDisposable = new CompositeDisposable();
@@ -53,6 +57,7 @@ public final class AppUpdateChecker implements LifecycleObserver{
         mCallback = builder.mCallback;
         mForceShow = builder.mForceShow;
         mVersionChecker = builder.mVersionChecker;
+        mPackageInstaller = builder.mPackageInstaller;
         mEnableLog = builder.mEnableLog;
     }
 
@@ -130,7 +135,7 @@ public final class AppUpdateChecker implements LifecycleObserver{
                     mCallback.onDataLoaded(appUpdateInfo);
                 }
                 if (mVersionChecker.hasAvailableUpdates(appUpdateInfo) || mForceShow) {
-                    mDisplay.show(activity, appUpdateInfo);
+                    mDisplay.show(activity, appUpdateInfo, mPackageInstaller);
                     if (mCallback != null) {
                         mCallback.onDisplayShowing(appUpdateInfo);
                     }
@@ -159,6 +164,8 @@ public final class AppUpdateChecker implements LifecycleObserver{
 
         private AppUpdateLifecycleCallback mCallback;
 
+        private PackageInstaller mPackageInstaller;
+
         public Builder withDisplay(Display display) {
             mDisplay = display;
             return this;
@@ -186,6 +193,11 @@ public final class AppUpdateChecker implements LifecycleObserver{
 
         public Builder withVersionChecker(AppVersionChecker versionChecker) {
             mVersionChecker = versionChecker;
+            return this;
+        }
+
+        public Builder withInstaller(PackageInstaller installer) {
+            mPackageInstaller = installer;
             return this;
         }
 
@@ -219,6 +231,10 @@ public final class AppUpdateChecker implements LifecycleObserver{
 
             if (mVersionChecker == null) {
                 mVersionChecker = AppVersionChecker.DEFAULT;
+            }
+
+            if (mPackageInstaller == null) {
+                mPackageInstaller = new GooglePlayInstaller();
             }
         }
     }
