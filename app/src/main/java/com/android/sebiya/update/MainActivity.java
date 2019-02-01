@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
                                 // make custom display such as notification, dialog, snackbar, toast, etc...
                                 String message = "TikTok app has " + (appUpdateInfo.hasAvailableUpdates() ? "update" : "no update");
                                 if (appUpdateInfo.hasAvailableUpdates()) {
-                                    message += "\nlatest version - " + appUpdateInfo.getLatestVersionName();
+                                    message += "\nlatest version - " + appUpdateInfo.getServerVersionName();
                                 }
                                 // make custom display such as notification, dialog, snackbar, toast, etc...
                                 new AlertDialog.Builder(activity)
@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
                             public void show(final Activity activity, final AppUpdateInfo appUpdateInfo, PackageInstaller installer) {
                                 String message = "TikTok app has " + (appUpdateInfo.hasAvailableUpdates() ? "update" : "no update");
                                 if (appUpdateInfo.hasAvailableUpdates()) {
-                                    message += "\nlatest version - " + appUpdateInfo.getLatestVersionName();
+                                    message += "\nlatest version - " + appUpdateInfo.getServerVersionName();
                                 }
                                 // make custom display such as notification, dialog, snackbar, toast, etc...
                                 new AlertDialog.Builder(activity)
@@ -268,11 +268,10 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public AppUpdateInfo convert(final String data) {
-            AppUpdateInfo appUpdateInfo = new AppUpdateInfo(targetVersionCode, targetVersionName);
             VersionSample versionSample = new Gson().fromJson(data, VersionSample.class);
-            appUpdateInfo.setLatestVersionCode(versionSample.latestVersion);
-            appUpdateInfo.setLatestVersionName(versionSample.latestVersionName);
-            return appUpdateInfo;
+            return new AppUpdateInfo.Builder(null)
+                    .withCurrentVersion(targetVersionCode, targetVersionName)
+                    .withServerVersion(versionSample.latestVersion, versionSample.latestVersionName).build();
         }
     }
 }

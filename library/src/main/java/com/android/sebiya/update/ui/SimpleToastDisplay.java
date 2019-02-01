@@ -13,7 +13,7 @@ public class SimpleToastDisplay implements Display {
     }
 
     protected String getMessage(AppUpdateInfo appUpdateInfo) {
-        return appUpdateInfo.hasAvailableUpdates() ? "Update " + appUpdateInfo.getLatestVersionName()
+        return appUpdateInfo.hasAvailableUpdates() ? "Update " + appUpdateInfo.getServerVersionName()
                 + " is available!" : "No updates available";
     }
 

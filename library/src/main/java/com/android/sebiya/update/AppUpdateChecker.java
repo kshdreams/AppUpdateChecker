@@ -75,7 +75,6 @@ public final class AppUpdateChecker implements LifecycleObserver{
                     loadAppUpdateInfo()
                             .subscribeOn(Schedulers.io())
                             .observeOn(AndroidSchedulers.mainThread())
-                            .map(updateVersionInfo())
                             .map(showUi(activity))
                             .subscribe(new Consumer<Boolean>() {
                                 @Override
@@ -111,18 +110,6 @@ public final class AppUpdateChecker implements LifecycleObserver{
         });
     }
 
-    private Function<AppUpdateInfo, AppUpdateInfo> updateVersionInfo() {
-        return new Function<AppUpdateInfo, AppUpdateInfo>() {
-            @Override
-            public AppUpdateInfo apply(final AppUpdateInfo appUpdateInfo) {
-                appUpdateInfo.setHasAvailableUpdates(mVersionChecker.hasAvailableUpdates(appUpdateInfo));
-                if (mEnableLog) {
-                    Log.d(LOG_TAG, "updateVersionInfo. data - " + appUpdateInfo);
-                }
-                return appUpdateInfo;
-            }
-        };
-    }
 
     private Function<AppUpdateInfo, Boolean> showUi(final Activity activity) {
         return new Function<AppUpdateInfo, Boolean>() {

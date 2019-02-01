@@ -21,6 +21,8 @@ public interface AppVersionChecker {
 
     boolean hasAvailableUpdates(AppUpdateInfo appUpdateInfo);
 
+    boolean hasForceUpdates(AppUpdateInfo appUpdateInfo);
+
     AppVersionChecker DEFAULT = new DefaultImpl();
 
     /**
@@ -30,16 +32,30 @@ public interface AppVersionChecker {
 
         @Override
         public boolean hasAvailableUpdates(final AppUpdateInfo appUpdateInfo) {
-            if (appUpdateInfo.getLatestVersionCode() > 0) {
-                return appUpdateInfo.getTargetVersionCode() < appUpdateInfo.getLatestVersionCode();
+            if (appUpdateInfo.getServerVersionCode() > 0) {
+                return appUpdateInfo.getCurrentVersionCode() < appUpdateInfo.getServerVersionCode();
             }
 
-            if (appUpdateInfo.getTargetVersionName() == null || appUpdateInfo.getLatestVersionName() == null) {
+            if (appUpdateInfo.getCurrentVersionName() == null || appUpdateInfo.getServerVersionName() == null) {
                 return false;
             }
 
-            Version version = new Version(appUpdateInfo.getLatestVersionName());
-            return version.isHigherThan(appUpdateInfo.getTargetVersionName());
+            Version version = new Version(appUpdateInfo.getServerVersionName());
+            return version.isHigherThan(appUpdateInfo.getCurrentVersionName());
+        }
+
+        @Override
+        public boolean hasForceUpdates(final AppUpdateInfo appUpdateInfo) {
+            if (appUpdateInfo.getForceUpdateVersionCode() > 0) {
+                return appUpdateInfo.getCurrentVersionCode() < appUpdateInfo.getForceUpdateVersionCode();
+            }
+
+            if (appUpdateInfo.getCurrentVersionName() == null || appUpdateInfo.getForceUpdateVersionName() == null) {
+                return false;
+            }
+
+            Version version = new Version(appUpdateInfo.getForceUpdateVersionName());
+            return version.isHigherThan(appUpdateInfo.getCurrentVersionName());
         }
     }
 }

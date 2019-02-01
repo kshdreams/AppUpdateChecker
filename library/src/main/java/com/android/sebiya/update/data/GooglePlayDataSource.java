@@ -63,8 +63,9 @@ public class GooglePlayDataSource implements DataSource {
                     .ownText();
             Log.d(LOG_TAG, "load. package - " + packageName + ", version name from web - " + versionName);
             if (versionName != null) {
-                info = new AppUpdateInfo(-1, targetVersionName);
-                info.setLatestVersionName(versionName);
+                info = new AppUpdateInfo.Builder(null)
+                        .withCurrentVersion(0, targetVersionName)
+                        .withServerVersion(0, versionName).build();
             }
         } catch (IOException e) {
             e.printStackTrace();
