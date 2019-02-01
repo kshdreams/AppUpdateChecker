@@ -7,11 +7,15 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import com.android.sebiya.update.AppVersionChecker.DefaultImpl;
 
-public final class AppUpdateInfo {
+public class AppUpdateInfo {
 
     private static final String LOG_TAG = "AppUpdateInfo";
 
     private Builder mBuilder;
+
+    public AppUpdateInfo() {
+
+    }
 
     private AppUpdateInfo(Builder builder) {
         mBuilder = builder;
@@ -62,6 +66,9 @@ public final class AppUpdateInfo {
         private final Context context;
 
 
+        /**
+         * @param context <code>null</code> possibly null if you call {@link #withCurrentVersion(long, String)}
+         */
         public Builder(@Nullable Context context) {
             this.context = context;
         }
@@ -71,6 +78,9 @@ public final class AppUpdateInfo {
             return this;
         }
 
+        /**
+         * if you don't set current version we will version code and name from PackageManager.
+         */
         public Builder withCurrentVersion(long code, String name) {
             currentVersionCode = code;
             currentVersionName = name;
