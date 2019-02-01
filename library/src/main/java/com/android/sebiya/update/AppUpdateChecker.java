@@ -121,7 +121,8 @@ public final class AppUpdateChecker implements LifecycleObserver{
                 if (mCallback != null) {
                     mCallback.onDataLoaded(appUpdateInfo);
                 }
-                if (mVersionChecker.hasAvailableUpdates(appUpdateInfo) || mForceShow) {
+                if (mVersionChecker.hasAvailableUpdates(appUpdateInfo) || mVersionChecker
+                        .hasForceUpdates(appUpdateInfo) || mForceShow) {
                     mDisplay.show(activity, appUpdateInfo, mPackageInstaller);
                     if (mCallback != null) {
                         mCallback.onDisplayShowing(appUpdateInfo);
